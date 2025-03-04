@@ -167,7 +167,7 @@ public class AuthServerConfig {
 	}
 	
 	//Clients Apps
-	@Bean
+	///@Bean
 	public RegisteredClientRepository registeredClientRepository1(
 			PasswordEncoder passwordEncoder, JdbcOperations jdbcOperations) 
 	{
@@ -181,7 +181,7 @@ public class AuthServerConfig {
 				//escopos que o cliente pode usar
 				.scope("write")
 				.scope("read")
-				.scope(OidcScopes.OPENID)
+				.scope(OidcScopes.OPENID) // 'openid' scope is auto-approved as it does not require consent
 				.scope("profile")
 				.scope("email")
 				.tokenSettings(
@@ -237,8 +237,7 @@ public class AuthServerConfig {
 //		//return rep;
 
 	
-		return new InMemoryRegisteredClientRepository(
-				Arrays.asList(postman1,device1));
+		return new InMemoryRegisteredClientRepository(Arrays.asList(postman1,device1));
 	}
 
 	
@@ -277,7 +276,7 @@ public class AuthServerConfig {
 	//Salva os TOKENs e codigos de autorizacao no Banco de Dados. 
 	//só descomentar o Bean
     @Bean
-    public OAuth2AuthorizationService oAuth2AuthorizationService(
+    public OAuth2AuthorizationService authorizationService(
     		JdbcOperations jdbcOperations,
     		RegisteredClientRepository registeredClientRepository) 
     {

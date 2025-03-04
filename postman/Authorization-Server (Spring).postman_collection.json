@@ -1,0 +1,698 @@
+{
+	"info": {
+		"_postman_id": "14756849-eb63-4bb2-ac67-70b145b044b1",
+		"name": "Authorization-Server (Spring)",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "27014757"
+	},
+	"item": [
+		{
+			"name": "Discovery-OpenID Provider Configuration Request",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var resp = pm.response.json();\r",
+							"pm.environment.set(\"authorization_endpoint\" , resp.authorization_endpoint);\r",
+							"pm.environment.set(\"end_session_endpoint\" , resp.end_session_endpoint);\r",
+							"pm.environment.set(\"issuer\" , resp.issuer);\r",
+							"pm.environment.set(\"jwks_uri\" , resp.jwks_uri);\r",
+							"pm.environment.set(\"revocation_endpoint\" , resp.revocation_endpoint);\r",
+							"pm.environment.set(\"token_endpoint\" , resp.token_endpoint);\r",
+							"pm.environment.set(\"userinfo_endpoint\" , resp.userinfo_endpoint);\r",
+							"pm.environment.set(\"introspection_endpoint\" , resp.introspection_endpoint);\r",
+							"pm.environment.set(\"device_authorization_endpoint\" , resp.device_authorization_endpoint);\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {}
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/.well-known/openid-configuration",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						".well-known",
+						"openid-configuration"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Password type (not supported)",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "username",
+							"value": "algafood-web",
+							"type": "string"
+						},
+						{
+							"key": "password",
+							"value": "123",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "grant_type",
+							"value": "password",
+							"type": "default"
+						},
+						{
+							"key": "username",
+							"value": "admin",
+							"type": "default"
+						},
+						{
+							"key": "password",
+							"value": "123",
+							"type": "default"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{token_endpoint}}",
+					"host": [
+						"{{token_endpoint}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Client Credentials",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var resp = pm.response.json();\r",
+							"pm.environment.set(\"access_token\" , resp.access_token);\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "username",
+							"value": "javascript1",
+							"type": "string"
+						},
+						{
+							"key": "password",
+							"value": "123",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "scope",
+							"value": "read write",
+							"description": "se não informar o escopo desejado, o token será gerado sem nenhum escopo.",
+							"type": "default"
+						},
+						{
+							"key": "grant_type",
+							"value": "client_credentials",
+							"type": "default"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{token_endpoint}}",
+					"host": [
+						"{{token_endpoint}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Authorization Code - AUTHORIZE",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/oauth2/authorize?response_type=code&client_id=postman1&state=abc&redirect_uri=https://oidcdebugger.com/debug",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"oauth2",
+						"authorize"
+					],
+					"query": [
+						{
+							"key": "response_type",
+							"value": "code"
+						},
+						{
+							"key": "client_id",
+							"value": "postman1"
+						},
+						{
+							"key": "state",
+							"value": "abc"
+						},
+						{
+							"key": "redirect_uri",
+							"value": "https://oidcdebugger.com/debug"
+						},
+						{
+							"key": "scope",
+							"value": "read",
+							"description": "se não informar o escopo desejado, o token será gerado sem nenhum escopo.",
+							"disabled": true
+						},
+						{
+							"key": "scope",
+							"value": "openid profile email read write",
+							"disabled": true
+						},
+						{
+							"key": "scope",
+							"value": "read write openid",
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Autorization Code - TOKEN",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var resp = pm.response.json();\r",
+							"pm.environment.set(\"access_token\" , resp.access_token);\r",
+							"pm.environment.set(\"id_token\" , resp.id_token);\r",
+							"pm.environment.set(\"refresh_token\" , resp.refresh_token);\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "username",
+							"value": "postman1",
+							"type": "string"
+						},
+						{
+							"key": "password",
+							"value": "123",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "grant_type",
+							"value": "authorization_code",
+							"type": "default"
+						},
+						{
+							"key": "code",
+							"value": "J-r1mz5IJ-RPeQN4gJzvPRomzbeF0nSKRFzIvDyAA1g-Ry6osvVLE1EPwBT9uwiAIdtOMb74JxNQzpgL4VDmOZD7BfDI0u4YiEar6eyNtxOYGKwsaNzzH8QxV_ncJ4lV",
+							"type": "default"
+						},
+						{
+							"key": "redirect_uri",
+							"value": "https://oidcdebugger.com/debug",
+							"type": "default"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{token_endpoint}}",
+					"host": [
+						"{{token_endpoint}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "PKCE Authoriz. Code - AUTHORIZE",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{authorization_endpoint}}?response_type=code&client_id=postman1&scope=read write&redirect_uri=https://oidcdebugger.com/debug&code_challenge=bKE9UspwyIPg8LsQHkJaiehiTeUdstI5JZOvaoQRgJA&code_challenge_method=S256",
+					"host": [
+						"{{authorization_endpoint}}"
+					],
+					"query": [
+						{
+							"key": "state",
+							"value": "abc",
+							"disabled": true
+						},
+						{
+							"key": "response_type",
+							"value": "code"
+						},
+						{
+							"key": "client_id",
+							"value": "postman1"
+						},
+						{
+							"key": "scope",
+							"value": "read write",
+							"description": "se não informar o escopo desejado, o token será gerado sem nenhum escopo."
+						},
+						{
+							"key": "redirect_uri",
+							"value": "https://oidcdebugger.com/debug"
+						},
+						{
+							"key": "code_challenge",
+							"value": "bKE9UspwyIPg8LsQHkJaiehiTeUdstI5JZOvaoQRgJA",
+							"description": "abc123"
+						},
+						{
+							"key": "code_challenge_method",
+							"value": "S256",
+							"description": "ou \"plain\""
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "PKCE Autoriz. Code - TOKEN",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var resp = pm.response.json();\r",
+							"pm.environment.set(\"access_token\" , resp.access_token);\r",
+							"pm.environment.set(\"id_token\" , resp.id_token);\r",
+							"pm.environment.set(\"refresh_token\" , resp.refresh_token);\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "username",
+							"value": "postman1",
+							"type": "string"
+						},
+						{
+							"key": "password",
+							"value": "123",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "grant_type",
+							"value": "authorization_code",
+							"type": "default"
+						},
+						{
+							"key": "code",
+							"value": "81h2sq-iXBXzFqQ19s6JKE5cFo1eT5W9WplUBvbJxaJngyprlJvoOQ0ib1I8d1Cj6dJeQnZXWcN4BLg8dQOATQYYhTQir5OHqF7YeiDxe_K2w9jRy9NN3yzXMmA1Q4JV",
+							"type": "default"
+						},
+						{
+							"key": "redirect_uri",
+							"value": "https://oidcdebugger.com/debug",
+							"type": "default"
+						},
+						{
+							"key": "code_verifier",
+							"value": "abc123",
+							"type": "default"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{token_endpoint}}",
+					"host": [
+						"{{token_endpoint}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Server Public JWKS",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": []
+				},
+				"url": {
+					"raw": "{{jwks_uri}}",
+					"host": [
+						"{{jwks_uri}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Introspection",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "username",
+							"value": "resource-server",
+							"type": "string"
+						},
+						{
+							"key": "password",
+							"value": "123",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "token",
+							"value": "{{access_token}}",
+							"type": "default"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{introspection_endpoint}}",
+					"host": [
+						"{{introspection_endpoint}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Refresh Token",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var resp = pm.response.json();\r",
+							"pm.environment.set(\"access_token\" , resp.access_token);\r",
+							"pm.environment.set(\"refresh_token\" , resp.refresh_token);\r",
+							"\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "username",
+							"value": "webclient1",
+							"type": "string"
+						},
+						{
+							"key": "password",
+							"value": "123",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "grant_type",
+							"value": "refresh_token",
+							"type": "default"
+						},
+						{
+							"key": "refresh_token",
+							"value": "{{refresh_token}}",
+							"type": "default"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{token_endpoint}}",
+					"host": [
+						"{{token_endpoint}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Revoke Token",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "username",
+							"value": "webclient1",
+							"type": "string"
+						},
+						{
+							"key": "password",
+							"value": "123",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "token",
+							"value": "{{refresh_token}}",
+							"type": "default"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{revocation_endpoint}}",
+					"host": [
+						"{{revocation_endpoint}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "logout",
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {}
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{end_session_endpoint}}",
+					"host": [
+						"{{end_session_endpoint}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "userInfo",
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {}
+			},
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{access_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{userinfo_endpoint}}",
+					"host": [
+						"{{userinfo_endpoint}}"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
